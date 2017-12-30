@@ -4,19 +4,22 @@
 	<groupId>org.bpt</groupId>
 	<artifactId>ioc</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+	<properties>
+		<spring.version>5.0.2.RELEASE</spring.version>
+	</properties>
 
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/org.springframework/spring-core -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
-			<version>5.0.0.M5</version>
+			<version>${spring.version}</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.springframework/spring-context -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
-			<version>5.0.0.M5</version>
+			<version>${spring.version}</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/junit/junit -->
 		<dependency>
@@ -33,4 +36,23 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<!-- Download Java source JARs. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+
 </project>
