@@ -15,6 +15,17 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 public class ContainerTest {
 
+	/**
+	 * The purpose of this test is to validate how eager vs lazy auto-wired
+	 * members of a component are dealt with. More specifically:
+	 * 
+	 * 1) Validate that a implicit, eager autowired member is eagerly
+	 * constructed.
+	 * 
+	 * 2) Validate that a lazily designated autowired member is wrapped with a
+	 * CGLIB proxy and constructed on first use.
+	 * 
+	 */
 	@Test
 	public void testLazyComponentEagerVsLazyAutowiredBehavior() {
 		try (AnnotationConfigApplicationContext acac = new AnnotationConfigApplicationContext()) {
