@@ -1,9 +1,9 @@
-package org.bpt.ioc.component;
+package org.bpt.ioc;
 
-public class Autowired {
+public class Traceable {
 	private final StackTraceElement[] ctorStack;
 
-	public Autowired() {
+	public Traceable() {
 		ctorStack = getStack();
 	}
 	public StackTraceElement[] getCtorStack() {

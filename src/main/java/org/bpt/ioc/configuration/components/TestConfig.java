@@ -1,4 +1,4 @@
-package org.bpt.ioc.configuration;
+package org.bpt.ioc.configuration.components;
 
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

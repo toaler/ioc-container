@@ -7,6 +7,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 
+import org.bpt.ioc.bean.Dinner;
+import org.bpt.ioc.bean.IceCream;
 import org.bpt.ioc.component.LazyAutoWired;
 import org.bpt.ioc.component.LazyComponent;
 import org.junit.Test;
@@ -30,7 +32,7 @@ public class ContainerTest {
 	public void testLazyComponentEagerVsLazyAutowiredBehavior() {
 		try (AnnotationConfigApplicationContext acac = new AnnotationConfigApplicationContext()) {
 
-			acac.scan("org.bpt.ioc.configuration");
+			acac.scan("org.bpt.ioc.configuration.components");
 			acac.refresh();
 
 			BeanDefinition bd = acac.getBeanDefinition("LazyComponent");
@@ -79,6 +81,30 @@ public class ContainerTest {
 
 		}
 
+	}
+	
+	@Test
+	public void testConfigurationEagerVsLazyBeanInjectionBehavior() {
+		try (AnnotationConfigApplicationContext acac = new AnnotationConfigApplicationContext()) {
+			acac.scan("org.bpt.ioc.configuration.beans");
+			acac.refresh();
+
+			Dinner d = acac.getBean("Dinner", Dinner.class);
+
+			IceCream ic = d.getIceCream();
+
+			// 0) Ensure LazyAutoWired is the correct proxy type (CGLIB)
+			assertTrue(ic.getClass().getName().startsWith("org.bpt.ioc.bean.IceCream$$EnhancerBySpringCGLIB"));
+
+			StackTraceElement[] ste = ic.getCtorStack(); // First access
+
+			// 1) Validate construction happened on first access.
+			assertTrue(hasOneFrameThatEndsWith(ste, "getCtorStack(<generated>)"));
+
+			// 2) Validated that lazy constructed object type
+			assertTrue(hasOneFrameThatStartsWith(ste, "org.bpt.ioc.component.IceCream.<init>"));
+
+		}
 	}
 
 	private boolean hasOneFrameThatStartsWith(StackTraceElement[] ste, String startsWith) {
