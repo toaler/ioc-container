@@ -9,6 +9,9 @@ import java.util.Arrays;
 
 import org.bpt.ioc.bean.Dinner;
 import org.bpt.ioc.bean.IceCream;
+import org.bpt.ioc.bean.Potatoe;
+import org.bpt.ioc.bean.Steak;
+import org.bpt.ioc.component.EagerAutoWired;
 import org.bpt.ioc.component.LazyAutoWired;
 import org.bpt.ioc.component.LazyComponent;
 import org.junit.Test;
@@ -46,7 +49,7 @@ public class ContainerTest {
 			StackTraceElement[] ste = lc.getEagerAutoWired().getCtorStack();
 			
 			// 0) Ensure EagerAutoWired is the correct non proxy type (non CGLIB)
-			assertEquals("org.bpt.ioc.component.EagerAutoWired", lc.getEagerAutoWired().getClass().getName());
+			assertEquals(EagerAutoWired.class.getName(), lc.getEagerAutoWired().getClass().getName());
 
 			// 1) Edge component is lazy which is created when ACAC.getBean is called
 			assertTrue(hasOneFrameThatStartsWith(ste,
@@ -78,9 +81,9 @@ public class ContainerTest {
 			// 2)  Validated that lazy constructed object type
 			assertTrue(hasOneFrameThatStartsWith(ste, "org.bpt.ioc.component.LazyAutoWired.<init>"));
 			
-
+			// 3) Validate that LazyAutoWired method calls pass through cglib generated proxy
+			assertTrue(hasOneFrameThatStartsWith(law.getAccessPath(), "org.springframework.cglib.proxy.MethodProxy.invoke("));
 		}
-
 	}
 	
 	@Test
@@ -91,18 +94,46 @@ public class ContainerTest {
 
 			Dinner d = acac.getBean("Dinner", Dinner.class);
 
+			// V A L I D A T E   E A G E R   I N J E C T E D   B E A N S
+			
+			// 0) Ensure Steak/Potatoe is the correct non proxy type (non CGLIB)
+			assertEquals(Steak.class.getName(), d.getSteak().getClass().getName());
+			assertEquals(Potatoe.class.getName(), d.getPotatoe().getClass().getName());
+
+			StackTraceElement[] ste = d.getSteak().getCtorStack();
+
+			// 1) Edge @Bean Dinner is eager which is created when ACAC.refresh is called
+			assertTrue(hasOneFrameThatStartsWith(ste,
+					"org.springframework.context.support.AbstractApplicationContext.refresh"));
+
+			// 2) Steak was autowired as it was a eagerly injected bean to Dinner
+			assertTrue(hasOneFrameThatStartsWith(ste,
+					"org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod"));
+
+			// 3) Validated eagerly injected @Bean Steak is constructed
+			assertTrue(hasOneFrameThatStartsWith(ste, "org.bpt.ioc.bean.Steak.<init>"));
+
+			// 4) Runtime check to validate Steak is not a proxy
+			assertFalse(hasOneFrameThatStartsWith(ste, "org.springframework.cglib.proxy.MethodProxy.invoke("));
+			
+			// V A L I D A T E   L A Z Y   I N J E C T E D   B E A N S
+			
+			// Get lazily injected IceCream
 			IceCream ic = d.getIceCream();
 
 			// 0) Ensure LazyAutoWired is the correct proxy type (CGLIB)
 			assertTrue(ic.getClass().getName().startsWith("org.bpt.ioc.bean.IceCream$$EnhancerBySpringCGLIB"));
 
-			StackTraceElement[] ste = ic.getCtorStack(); // First access
+			ste = ic.getCtorStack(); // First access to wrapped IceCream instance.
 
 			// 1) Validate construction happened on first access.
 			assertTrue(hasOneFrameThatEndsWith(ste, "getCtorStack(<generated>)"));
 
 			// 2) Validated that lazy constructed object type
-			assertTrue(hasOneFrameThatStartsWith(ste, "org.bpt.ioc.component.IceCream.<init>"));
+			assertTrue(hasOneFrameThatStartsWith(ste, "org.bpt.ioc.bean.IceCream.<init>"));
+
+			// 3) Validate that IceCream method calls pass through cglib generated proxy
+			assertTrue(hasOneFrameThatStartsWith(ic.getAccessPath(), "org.springframework.cglib.proxy.MethodProxy.invoke("));
 
 		}
 	}
