@@ -13,6 +13,7 @@ import org.bpt.ioc.bean.Potatoe;
 import org.bpt.ioc.bean.Steak;
 import org.bpt.ioc.component.EagerAutoWired;
 import org.bpt.ioc.component.LazyAutoWired;
+import org.bpt.ioc.component.LazyAutoWiredViaSetter;
 import org.bpt.ioc.component.LazyComponent;
 import org.junit.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -68,7 +69,6 @@ public class ContainerTest {
 			// V A L I D A T E   L A Z Y   A U T O W I R E D   M E M B E R S
 			LazyAutoWired law = lc.getLazyAutoWired();
 			
-			
 			// 0) Ensure LazyAutoWired is the correct proxy type (CGLIB)
 			assertTrue(law.getClass().getName()
 					.startsWith("org.bpt.ioc.component.LazyAutoWired$$EnhancerBySpringCGLIB"));
@@ -83,6 +83,23 @@ public class ContainerTest {
 			
 			// 3) Validate that LazyAutoWired method calls pass through cglib generated proxy
 			assertTrue(hasOneFrameThatStartsWith(law.getAccessPath(), "org.springframework.cglib.proxy.MethodProxy.invoke("));
+			
+			
+			// V A L I D A T E   L A Z Y   A U T O W I R E D   M E M B E R S   V I A   S E T T E R S
+			
+			LazyAutoWiredViaSetter lawvs = lc.getLazyAutoWiredViaSetter();
+			
+			ste = lawvs.getCtorStack();  // First access
+			
+			// 1) Validate construction happened on first access.
+			assertTrue(hasOneFrameThatEndsWith(ste, "getCtorStack(<generated>)"));
+			
+			// 2)  Validated that lazy constructed object type
+			assertTrue(hasOneFrameThatStartsWith(ste, "org.bpt.ioc.component.LazyAutoWiredViaSetter.<init>"));
+			
+			// 3) Validate that LazyAutoWired method calls pass through cglib generated proxy
+			
+			assertTrue(hasOneFrameThatStartsWith(lawvs.getAccessPath(), "org.springframework.cglib.proxy.MethodProxy.invoke("));
 		}
 	}
 	
@@ -134,7 +151,6 @@ public class ContainerTest {
 
 			// 3) Validate that IceCream method calls pass through cglib generated proxy
 			assertTrue(hasOneFrameThatStartsWith(ic.getAccessPath(), "org.springframework.cglib.proxy.MethodProxy.invoke("));
-
 		}
 	}
 

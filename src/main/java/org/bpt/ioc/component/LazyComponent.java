@@ -17,6 +17,17 @@ public class LazyComponent {
 
 	@Autowired
 	private EagerAutoWired eagerAutoWired;
+	
+	private LazyAutoWiredViaSetter lazyAutoWiredViaSetter;
+	
+	@Autowired
+	public void setLazyAutoWiredViaSetter(@Lazy LazyAutoWiredViaSetter lazyAutoWiredViaSetter) {
+		this.lazyAutoWiredViaSetter = lazyAutoWiredViaSetter; 
+	}
+	
+	public LazyAutoWiredViaSetter getLazyAutoWiredViaSetter() {
+		return lazyAutoWiredViaSetter;
+	}
 
 	public LazyAutoWired getLazyAutoWired() {
 		return lazyAutoWired;
